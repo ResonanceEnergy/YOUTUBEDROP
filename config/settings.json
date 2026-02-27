@@ -1,9 +1,16 @@
-{
-    "name": "YOUTUBEDROP",
-    "version": "0.1.0",
-    "tier": "M",
-    "risk_tier": "MEDIUM",
-    "autonomy_level": "L1",
-    "generated_by": "OPTIMUS REPO DEPOT v3.0",
-    "generated_at": "2026-02-23T21:33:00.471073"
+﻿{
+  "name": "YOUTUBEDROP",
+  "version": "0.1.0",
+  "youtube_api_key": "${YOUTUBE_API_KEY}",
+  "download_dir": "downloads",
+  "output_dir": "output",
+  "max_video_duration": 3600,
+  "supported_formats": ["mp4", "webm", "mp3"],
+  "ncl_integration": true,
+  "default_privacy": "private",
+  "default_category_id": "22",
+  "script_defaults": {
+    "duration_min": 10,
+    "tone": "educational, energetic"
+  }
 }
