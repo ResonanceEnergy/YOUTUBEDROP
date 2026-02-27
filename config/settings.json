@@ -1,7 +1,6 @@
-﻿{
+{
   "name": "YOUTUBEDROP",
   "version": "0.1.0",
-  "youtube_api_key": "${YOUTUBE_API_KEY}",
   "download_dir": "downloads",
   "output_dir": "output",
   "max_video_duration": 3600,
