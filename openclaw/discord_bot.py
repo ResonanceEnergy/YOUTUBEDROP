@@ -3,6 +3,7 @@ Discord Bot for YOUTUBEDROP
 Send YouTube links from your phone/iPad via Discord.
 """
 
+import asyncio
 import logging
 import discord
 from discord.ext import commands
@@ -175,7 +176,7 @@ class DiscordBot(commands.Bot):
             )
 
             # Process in background
-            self.loop.create_task(
+            asyncio.create_task(
                 self._process_and_notify(message, processing_msg, vid)
             )
 

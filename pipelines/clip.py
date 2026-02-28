@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Dict
 import subprocess, json, os, tempfile
 
-from utils.io import artifacts_dir, ensure_dir, save_json, log_info
+from utils.io import artifacts_dir, ensure_dir
 
 
 def _write_srt_for_segment(seg: Dict, out_srt: Path):

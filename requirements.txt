@@ -23,4 +23,3 @@ aiosqlite==0.20.0
 rich==13.9.4
 tenacity==9.0.0
 requests==2.32.3
-ffmpeg-python==0.2.0

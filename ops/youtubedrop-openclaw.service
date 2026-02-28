@@ -1,0 +1,24 @@
+[Unit]
+Description=YOUTUBEDROP OpenClaw Bot (Telegram + Discord)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=youtubedrop
+Group=youtubedrop
+WorkingDirectory=/opt/youtubedrop
+EnvironmentFile=/opt/youtubedrop/.env
+ExecStart=/opt/youtubedrop/.venv/bin/python -m openclaw
+Restart=on-failure
+RestartSec=10
+StandardOutput=append:/var/log/youtubedrop/openclaw.log
+StandardError=append:/var/log/youtubedrop/openclaw-error.log
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/youtubedrop/downloads /opt/youtubedrop/data /opt/youtubedrop/ncl_out
+
+[Install]
+WantedBy=multi-user.target

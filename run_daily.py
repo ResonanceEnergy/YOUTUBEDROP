@@ -4,7 +4,7 @@ import argparse, json
 from pathlib import Path
 
 from dotenv import load_dotenv
-from utils.io import load_json, load_yaml, data_root, artifacts_dir, log_info, log_warn
+from utils.io import load_json, load_yaml, data_root, log_info, log_warn
 from pipelines.ingest import ingest_new
 from pipelines.transcripts import fetch_transcript, download_video
 from pipelines.segment import build_segments
@@ -19,11 +19,11 @@ load_dotenv()
 def process_video(
     video_id: str, relevance_path: Path, routes_path: Path, portrait: bool = False
 ):
-    meta = (
-        load_json(artifacts_dir(video_id).parent / video_id / "metadata.json")
-        if (artifacts_dir(video_id).parent / video_id / "metadata.json").exists()
-        else load_json(data_root() / "videos" / video_id / "metadata.json")
-    )
+    meta_path = data_root() / "videos" / video_id / "metadata.json"
+    if not meta_path.exists():
+        log_warn(f"No metadata for {video_id}, skipping")
+        return
+    meta = load_json(meta_path)
 
     # transcript + download
     t = fetch_transcript(video_id)
@@ -34,6 +34,9 @@ def process_video(
 
     # rank
     ranked = rank_video_segments(video_id, relevance_path)
+    if not ranked or "ranked" not in ranked:
+        log_warn(f"No ranked output for {video_id}, skipping")
+        return
 
     # clip top segments per org (news + insight)
     profiles_data = load_yaml(relevance_path)
@@ -57,7 +60,7 @@ def process_video(
             s.setdefault("clip_paths", []).append(str(clip_path))
 
     # publish packets & brief
-    pkts = publish_packets(meta, ranked, top_k=2)
+    pkts = publish_packets(meta, ranked, top_k=daily_top_k)
     write_daily_brief(pkts)
     maybe_open_issues(pkts, routes_path)
 
@@ -85,12 +88,15 @@ def main():
             log_warn("No videos to process. Run ingest mode first.")
             return
         for vid in seen.keys():
-            process_video(
-                vid,
-                Path(args.relevance),
-                Path(args.routes),
-                portrait=args.portrait,
-            )
+            try:
+                process_video(
+                    vid,
+                    Path(args.relevance),
+                    Path(args.routes),
+                    portrait=args.portrait,
+                )
+            except Exception as e:
+                log_warn(f"Failed to process {vid}, continuing: {e}")
 
 
 if __name__ == "__main__":

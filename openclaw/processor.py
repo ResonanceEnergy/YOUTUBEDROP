@@ -143,7 +143,7 @@ class YouTubeProcessor:
                 try:
                     api = YouTubeTranscriptApi()
                     return api.fetch(video_id)
-                except TypeError:
+                except (TypeError, AttributeError):
                     # Fallback for 0.6.x static API
                     return YouTubeTranscriptApi.get_transcript(video_id)
 
@@ -185,14 +185,16 @@ class YouTubeProcessor:
         return {k: info.get(k) for k in keys if info.get(k) is not None}
 
     async def _run_pipeline(self, video_id: str, info: dict):
-        """Run the full YOUTUBEDROP pipeline: ingest → segment → rank → publish.
+        """Run the full YOUTUBEDROP pipeline: ingest → segment → rank → clip → publish.
         This integrates dropped links into the same pipeline as the daily cron job."""
         try:
             from pipelines.ingest import ingest_single_video
             from pipelines.transcripts import fetch_transcript
             from pipelines.segment import build_segments
             from pipelines.rank import rank_video_segments
-            from pipelines.publish import publish_packets, write_daily_brief
+            from pipelines.clip import clip_segment
+            from pipelines.publish import publish_packets, write_daily_brief, maybe_open_issues
+            from utils.io import load_json, load_yaml, data_root
 
             loop = asyncio.get_event_loop()
 
@@ -209,17 +211,54 @@ class YouTubeProcessor:
 
             # Rank against relevance profiles
             relevance_path = _project_root / "doctrine" / "relevance_profiles.yaml"
-            if relevance_path.exists():
-                ranked = await loop.run_in_executor(
-                    None, rank_video_segments, video_id, relevance_path
-                )
-                if ranked:
-                    from utils.io import load_json, data_root
-                    meta_path = data_root() / "videos" / video_id / "metadata.json"
-                    if meta_path.exists():
-                        meta = load_json(meta_path)
-                        pkts = publish_packets(meta, ranked, top_k=2)
-                        write_daily_brief(pkts)
+            routes_path = _project_root / "doctrine" / "org_routes.yaml"
+            if not relevance_path.exists():
+                logger.debug("No relevance profiles found, skipping rank/publish")
+                return
+
+            ranked = await loop.run_in_executor(
+                None, rank_video_segments, video_id, relevance_path
+            )
+            if not ranked or "ranked" not in ranked:
+                logger.debug(f"No ranked output for {video_id}")
+                return
+
+            meta_path = data_root() / "videos" / video_id / "metadata.json"
+            if not meta_path.exists():
+                logger.debug(f"No metadata for {video_id}, skipping publish")
+                return
+
+            meta = load_json(meta_path)
+
+            # Clip top segments per org
+            profiles_data = load_yaml(relevance_path)
+            for org, org_segs in ranked["ranked"].items():
+                if not org_segs:
+                    continue
+                prof = profiles_data.get("profiles", {}).get(org, {})
+                max_news = prof.get("max_clip_seconds_news", 60)
+                max_ins = prof.get("max_clip_seconds_insight", 180)
+                chosen = []
+                if len(org_segs) > 0:
+                    chosen.append(("news", org_segs[0], max_news))
+                if len(org_segs) > 1:
+                    chosen.append(("insight", org_segs[1], max_ins))
+                for kind, s, mx in chosen:
+                    try:
+                        clip_path = await loop.run_in_executor(
+                            None, clip_segment, video_id, s, mx
+                        )
+                        s.setdefault("clip_paths", []).append(str(clip_path))
+                    except Exception as e:
+                        logger.warning(f"Clip failed for {video_id} {kind}: {e}")
+
+            # Publish
+            pkts = publish_packets(meta, ranked, top_k=2)
+            write_daily_brief(pkts)
+
+            # Open GitHub issues if configured
+            if routes_path.exists():
+                maybe_open_issues(pkts, routes_path)
 
             logger.info(f"Pipeline complete for {video_id}")
 

@@ -29,7 +29,7 @@ def fetch_transcript(video_id: str) -> Dict:
         try:
             api = YouTubeTranscriptApi()
             entries = api.fetch(video_id)
-        except TypeError:
+        except (TypeError, AttributeError):
             # 0.6.x static API fallback
             transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
             transcript = None

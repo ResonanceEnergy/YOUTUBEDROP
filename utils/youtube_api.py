@@ -14,8 +14,9 @@ def build_client():
     return build("youtube", "v3", developerKey=key)
 
 
-def list_channel_uploads(channel_id: str) -> List[Dict]:
-    """Return latest videos (id, title, publishedAt) for a channel."""
+def list_channel_uploads(channel_id: str, max_videos: int = 200) -> List[Dict]:
+    """Return latest videos (id, title, publishedAt) for a channel.
+    max_videos caps the total fetched to avoid quota exhaustion."""
     yt = build_client()
 
     # Step 1: get uploads playlist id
@@ -30,13 +31,15 @@ def list_channel_uploads(channel_id: str) -> List[Dict]:
     request = yt.playlistItems().list(
         part="contentDetails,snippet", playlistId=uploads_pl, maxResults=50
     )
-    while request:
+    while request and len(vids) < max_videos:
         resp = request.execute()
         for it in resp.get("items", []):
             vid_id = it["contentDetails"]["videoId"]
             title = it["snippet"]["title"]
             publishedAt = it["contentDetails"].get("videoPublishedAt") or it["snippet"].get("publishedAt")
             vids.append({"video_id": vid_id, "title": title, "publishedAt": publishedAt})
+            if len(vids) >= max_videos:
+                break
         request = yt.playlistItems().list_next(request, resp)
 
     log_info(f"Found {len(vids)} videos for channel {channel_id}")

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os, json, uuid, re, shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any, Dict, List
 
 import yaml
@@ -24,7 +24,7 @@ def ensure_dir(path: Path) -> Path:
 
 
 def now_iso() -> str:
-    return datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def load_yaml(path: Path) -> dict:
