@@ -1,0 +1,14 @@
+version: 1
+
+routes:
+  AAC:
+    brief_dir: AAC
+    github_repo: AAC        # key in env NCC_REPO_MAP_JSON
+
+  NCL:
+    brief_dir: NCL
+    github_repo: NCL
+
+  FuturePredictor:
+    brief_dir: FuturePredictor
+    github_repo: FuturePredictor

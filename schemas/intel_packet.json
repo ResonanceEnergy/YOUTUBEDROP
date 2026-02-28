@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "IntelPacket",
+  "type": "object",
+  "properties": {
+    "video_id": {"type": "string"},
+    "channel_id": {"type": "string"},
+    "title": {"type": "string"},
+    "publishedAt": {"type": "string"},
+    "segment_start": {"type": "number"},
+    "segment_end": {"type": "number"},
+    "summary_bullets": {"type": "array", "items": {"type": "string"}},
+    "claims": {"type": "array", "items": {"type": "string"}},
+    "routing": {"type": "array", "items": {"type": "string"}},
+    "score_by_org": {"type": "object"},
+    "clip_paths": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["video_id", "title", "segment_start", "segment_end", "summary_bullets", "routing"]
+}

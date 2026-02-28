@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  openclaw:
+    build: .
+    container_name: youtubedrop-openclaw
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./downloads:/app/downloads
+      - ./data:/app/data
+      - ./ncl_out:/app/ncl_out
+      - ./youtubedrop.db:/app/youtubedrop.db
+    environment:
+      - DOWNLOAD_DIR=/app/downloads
+      - DATA_ROOT=/app/data
+      - NCL_ROOT=/app/ncl_out
+      - DATABASE_URL=sqlite:///./youtubedrop.db

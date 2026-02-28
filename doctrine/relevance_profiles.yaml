@@ -1,0 +1,26 @@
+version: 1
+
+profiles:
+  AAC:
+    keywords: [earnings, guidance, options, IV, macro, rates, CPI, margin, deliveries, catalyst, split, upgrade, downgrade, valuation, FCF, revenue, profit, growth]
+    entities: [TSLA, NVDA, AAPL, SPY, QQQ, AMZN, MSFT, FED, CPI, PPI, FOMC]
+    penalties: [prank, vlog, lifestyle, drama, gossip]
+    require_claim_or_metric: true
+    max_clip_seconds_news: 60
+    max_clip_seconds_insight: 180
+
+  NCL:
+    keywords: [autonomy, orchestration, governance, local-first, privacy, agents, scheduler, reliability, provenance, council, doctrine, backlog, triage]
+    entities: [NCL, NCC, Super Agency, AZ]
+    penalties: [entertainment, gossip]
+    require_claim_or_metric: false
+    max_clip_seconds_news: 60
+    max_clip_seconds_insight: 300
+
+  FuturePredictor:
+    keywords: [trend, adoption, exponential, S-curve, policy, regulation, ban, subsidy, pilot, rollout, roadmap, breakthrough, prototype]
+    entities: [AI, autonomy, energy, robotics, biotech, space, EV]
+    penalties: [speculation without evidence]
+    require_claim_or_metric: false
+    max_clip_seconds_news: 60
+    max_clip_seconds_insight: 240

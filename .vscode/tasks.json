@@ -1,0 +1,34 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Snipper: Ingest",
+      "type": "shell",
+      "command": "python run_daily.py --mode ingest",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Snipper: Process New",
+      "type": "shell",
+      "command": "python run_daily.py --mode process_new",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Snipper: All (Ingest→Process)",
+      "type": "shell",
+      "command": "python run_daily.py --mode all",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "OpenClaw: Start Bots",
+      "type": "shell",
+      "command": "python -m openclaw",
+      "group": "build",
+      "problemMatcher": [],
+      "isBackground": true
+    }
+  ]
+}
